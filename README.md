@@ -16,7 +16,7 @@ Time | Session
 3:15 PM - 3:30 PM | _Labs Review_
 3:30 PM - 3:45 PM | _Break_
 3:45 PM - 4:15 PM | Lab 2: _Scaling, Auto Scaling_
-4:15 PM - 4:45 PM | Lab 3: _Monitoring, Metrics_
+4:15 PM - 4:45 PM | Lab 3: _Monitoring, Metrics and HA_
 4:45 PM - 5:00 PM | _Labs Review_ 
 5:00 PM - 5:15 PM | Wrap-Up & Q&A - Lessons Learnt - what doesn't work.
 
@@ -30,8 +30,9 @@ This is a _loose_ schedule for the day. We will adjust as necessary based on our
   - [Lab 0 - Setup the Workshop Environment](session_01/lab_00/lab_00.adoc)
   - [Lab 1 - Pushing Your First Application](session_01/lab_01/lab_01.adoc)
   - [Lab 2 - Scaling, Auto Scaling](session_01/lab_02/lab_02.adoc)
-  - [Lab 3 - Monitoring, Metrics](session_01/lab_03/lab_03.adoc)
+  - [Lab 3 - Monitoring, Metrics, HA](session_01/lab_03/lab_03.adoc)
 
 #### _Home Work_
-  - [Lab 4 - HA, Zero Downtime Deployment](session_01/lab_04/lab_04.adoc)
+  - [Lab 4 - Zero Downtime Deployment](session_01/lab_04/lab_04.adoc)
+  - [Lab 5 - Binding, Services](session_01/lab_05/lab_05.adoc)
 
