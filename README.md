@@ -23,7 +23,6 @@ Time | Session
 
 This is a _loose_ schedule for the day. We will adjust as necessary based on our pace through the material.
 
-and Zero Downtime Deployment Lab_
 
 ## Course Materials
 
@@ -33,6 +32,6 @@ and Zero Downtime Deployment Lab_
   - [Lab 2 - Scaling, Auto Scaling](session_01/lab_02/lab_02.adoc)
   - [Lab 3 - Monitoring, Metrics](session_01/lab_03/lab_03.adoc)
 
-#### _Home Work
+#### _Home Work_
   - [Lab 4 - HA, Zero Downtime Deployment](session_01/lab_04/lab_04.adoc)
 

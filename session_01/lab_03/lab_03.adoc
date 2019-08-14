@@ -57,69 +57,6 @@ These events are properly interwoven based on time, giving you an accurate pictu
 +
 You can try various things like refreshing the browser and triggering stop/start events to see logs being generated.
 
-== Health Management
-
-Cloud Foundry's https://docs.pivotal.io/pivotalcf/1-9/concepts/architecture/#nsync-bbs[components] actively monitors the health of our application processes and will restart them should they crash.
-
-. If you don't have one already running, start a log tail for your articulate application. 
-+
-----
-> cf logs shiva-articulate
-Connected, tailing logs for app shiva-articulate in org shiva-pcf-poc / space development as shreddy@pivotal.io...
-----
-
-. If you do not have more than one application instance running, execute the scale command to scale to 2 or more application instances.  Visit the application in the browser, click on 'Scale & HA' link and click on the `Kill' button. This button will trigger an Environment.Exit(-1) causing the Health Manager to observe an application instance crash:
-+
-image::../../Common/images/kill-button.png[]
-
-. After clicking the kill  a couple of interesting things should happen.
-First, you'll see that the application continues to service requests as all requests will now be serviced by the remaining instance (#1 in this example)
-+
-image::../../Common/images/ha-instance.png[]
-+
-Also, if you're paying attention to the log tail, you'll see some interesting log messages fly by:
-+
-====
-----
-2017-04-04T18:39:37.37-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:37.375  WARN 17 --- [nio-8080-exec-8] i.p.e.a.controller.ArticulateController  : *** The system is shutting down. ***
-2017-04-04T18:39:37.37-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:37.377  WARN 17 --- [       Thread-5] i.p.e.a.controller.ArticulateController  : killing shortly Thread-5
-2017-04-04T18:39:37.73-0400 [RTR/4]      OUT shiva-articulate.cfapps.io - [2017-04-04T22:39:37.721+0000] "GET /images/basics1.png HTTP/1.1" 200 0 167920 "https://shiva-articulate.cfapps.io/basics?doit=true" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36" "10.10.2.141:1538" "10.10.148.81:61131" x_forwarded_for:"208.102.173.112" x_forwarded_proto:"https" vcap_request_id:"f130b6ae-3022-4173-49ae-592158159480" response_time:0.009626627 app_id:"8e5b3fd9-272b-41bc-8a5e-b08528e06da0" app_index:"1" x_b3_traceid:"916cefcd630e8d4b" x_b3_spanid:"916cefcd630e8d4b" x_b3_parentspanid:"-"
-2017-04-04T18:39:42.38-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:42.377  WARN 17 --- [       Thread-5] i.p.e.a.controller.ArticulateController  : killed Thread-5
-2017-04-04T18:39:42.65-0400 [APP/PROC/WEB/0]OUT Exit status 0
-2017-04-04T18:39:42.66-0400 [CELL/0]     OUT Exit status 0
-2017-04-04T18:39:42.69-0400 [CELL/0]     OUT Destroying container
-2017-04-04T18:39:42.71-0400 [API/4]      OUT App instance exited with guid 8e5b3fd9-272b-41bc-8a5e-b08528e06da0 payload: {"instance"=>"", "index"=>0, "reason"=>"CRASHED", "exit_description"=>"2 error(s) occurred:\n\n* 2 error(s) occurred:\n\n* Codependent step exited\n* cancelled\n* cancelled", "crash_count"=>2, "crash_timestamp"=>1491345582680005783, "version"=>"e0e40fba-3195-432b-9c0f-5eec45f150d2"}
-
-----
-<1> Just before issuing the `Environment.Exit(-1)` call, the application logs that the kill switch was clicked.
-<2> The (Go)Router routes requests to the remaining app instance.
-<3> The API logs that an application instance exited due to a crash.
-====
-
-. Wait a few seconds...  By this time you should have noticed some additional interesting events in the logs:
-+
-====
-----
-2017-04-04T18:39:43.07-0400 [CELL/0]     OUT Creating container
-2017-04-04T18:39:43.39-0400 [CELL/0]     OUT Successfully destroyed container
-2017-04-04T18:39:46.67-0400 [CELL/0]     OUT Starting health monitoring of container
-2017-04-04T18:39:37.48-0400 [RTR/0]      OUT shiva-articulate.cfapps.io - [2017-04-04T22:39:37.473+0000] "GET /webjars/morrisjs/0.5.1/morris.css HTTP/1.1" 200 0 433 "https://shiva-articulate.cfapps.io/basics?doit=true" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36" "10.10.2.141:43497" "10.10.147.161:61134" x_forwarded_for:"208.102.173.112" x_forwarded_proto:"https" vcap_request_id:"994f45d5-37f2-4f94-79ad-6958b21cb0c5" response_time:0.007814256 app_id:"8e5b3fd9-272b-41bc-8a5e-b08528e06da0" app_index:"0" x_b3_traceid:"2814b159395e4a17" x_b3_spanid:"2814b159395e4a17" x_b3_parentspanid:"-"
-2017-04-04T18:39:49.05-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.046  INFO 14 --- [           main] i.p.e.articulate.ArticulateApplication   : The following profiles are active: cloud
-2017-04-04T18:39:49.02-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.028  INFO 14 --- [           main] nfigurationApplicationContextInitializer : Adding cloud service auto-reconfiguration to ApplicationContext
-2017-04-04T18:39:49.04-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.046  INFO 14 --- [           main] i.p.e.articulate.ArticulateApplication   : Starting ArticulateApplication on e1444c83-4b34-45e7-42ad-10e2ecac6b67 with PID 14 (/home/vcap/app started by vcap in /home/vcap/app)
-2017-04-04T18:39:49.87-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.873  INFO 14 --- [           main] urceCloudServiceBeanFactoryPostProcessor : No beans of type javax.sql.DataSource found. Skipping auto-reconfiguration.
-2017-04-04T18:39:49.86-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.869  INFO 14 --- [           main] urceCloudServiceBeanFactoryPostProcessor : Auto-reconfiguring beans of type javax.sql.DataSource
-
-----
-<1> The CELL indicates that it is starting another instance of the application as a result of the Health Manager observing a difference between the desired and actual state (i.e. running instances = 1 vs. running instances = 0).
-<2> The new application instance starts logging events as it starts up.
-====
-Hit CTRL + C to stop tailing the logs.
-
-. Revisiting the *HOME PAGE* of the application and you should see a fresh instance started:
-+
-image::../../Common/images/ha-ok.png[]
-
 == Viewing Application _Events_
 
 Cloud Foundry only allows application configuration to be modified via its API.
@@ -255,6 +192,69 @@ image::../../Common/images/pcf-metrics-link.png[]
 +
 image::../../Common/images/pcf-metrics-data.png[]
 
-This completes the lab for Monitoring, Metrics and HA !
 
+== Health Management
+
+Cloud Foundry's https://docs.pivotal.io/pivotalcf/1-9/concepts/architecture/#nsync-bbs[components] actively monitors the health of our application processes and will restart them should they crash.
+
+. If you don't have one already running, start a log tail for your articulate application. 
++
+----
+> cf logs shiva-articulate
+Connected, tailing logs for app shiva-articulate in org shiva-pcf-poc / space development as shreddy@pivotal.io...
+----
+
+. If you do not have more than one application instance running, execute the scale command to scale to 2 or more application instances.  Visit the application in the browser, click on 'Scale & HA' link and click on the `Kill' button. This button will trigger an Environment.Exit(-1) causing the Health Manager to observe an application instance crash:
++
+image::../../Common/images/kill-button.png[]
+
+. After clicking the kill  a couple of interesting things should happen.
+First, you'll see that the application continues to service requests as all requests will now be serviced by the remaining instance (#1 in this example)
++
+image::../../Common/images/ha-instance.png[]
++
+Also, if you're paying attention to the log tail, you'll see some interesting log messages fly by:
++
+====
+----
+2017-04-04T18:39:37.37-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:37.375  WARN 17 --- [nio-8080-exec-8] i.p.e.a.controller.ArticulateController  : *** The system is shutting down. ***
+2017-04-04T18:39:37.37-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:37.377  WARN 17 --- [       Thread-5] i.p.e.a.controller.ArticulateController  : killing shortly Thread-5
+2017-04-04T18:39:37.73-0400 [RTR/4]      OUT shiva-articulate.cfapps.io - [2017-04-04T22:39:37.721+0000] "GET /images/basics1.png HTTP/1.1" 200 0 167920 "https://shiva-articulate.cfapps.io/basics?doit=true" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36" "10.10.2.141:1538" "10.10.148.81:61131" x_forwarded_for:"208.102.173.112" x_forwarded_proto:"https" vcap_request_id:"f130b6ae-3022-4173-49ae-592158159480" response_time:0.009626627 app_id:"8e5b3fd9-272b-41bc-8a5e-b08528e06da0" app_index:"1" x_b3_traceid:"916cefcd630e8d4b" x_b3_spanid:"916cefcd630e8d4b" x_b3_parentspanid:"-"
+2017-04-04T18:39:42.38-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:42.377  WARN 17 --- [       Thread-5] i.p.e.a.controller.ArticulateController  : killed Thread-5
+2017-04-04T18:39:42.65-0400 [APP/PROC/WEB/0]OUT Exit status 0
+2017-04-04T18:39:42.66-0400 [CELL/0]     OUT Exit status 0
+2017-04-04T18:39:42.69-0400 [CELL/0]     OUT Destroying container
+2017-04-04T18:39:42.71-0400 [API/4]      OUT App instance exited with guid 8e5b3fd9-272b-41bc-8a5e-b08528e06da0 payload: {"instance"=>"", "index"=>0, "reason"=>"CRASHED", "exit_description"=>"2 error(s) occurred:\n\n* 2 error(s) occurred:\n\n* Codependent step exited\n* cancelled\n* cancelled", "crash_count"=>2, "crash_timestamp"=>1491345582680005783, "version"=>"e0e40fba-3195-432b-9c0f-5eec45f150d2"}
+
+----
+<1> Just before issuing the `Environment.Exit(-1)` call, the application logs that the kill switch was clicked.
+<2> The (Go)Router routes requests to the remaining app instance.
+<3> The API logs that an application instance exited due to a crash.
+====
+
+. Wait a few seconds...  By this time you should have noticed some additional interesting events in the logs:
++
+====
+----
+2017-04-04T18:39:43.07-0400 [CELL/0]     OUT Creating container
+2017-04-04T18:39:43.39-0400 [CELL/0]     OUT Successfully destroyed container
+2017-04-04T18:39:46.67-0400 [CELL/0]     OUT Starting health monitoring of container
+2017-04-04T18:39:37.48-0400 [RTR/0]      OUT shiva-articulate.cfapps.io - [2017-04-04T22:39:37.473+0000] "GET /webjars/morrisjs/0.5.1/morris.css HTTP/1.1" 200 0 433 "https://shiva-articulate.cfapps.io/basics?doit=true" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36" "10.10.2.141:43497" "10.10.147.161:61134" x_forwarded_for:"208.102.173.112" x_forwarded_proto:"https" vcap_request_id:"994f45d5-37f2-4f94-79ad-6958b21cb0c5" response_time:0.007814256 app_id:"8e5b3fd9-272b-41bc-8a5e-b08528e06da0" app_index:"0" x_b3_traceid:"2814b159395e4a17" x_b3_spanid:"2814b159395e4a17" x_b3_parentspanid:"-"
+2017-04-04T18:39:49.05-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.046  INFO 14 --- [           main] i.p.e.articulate.ArticulateApplication   : The following profiles are active: cloud
+2017-04-04T18:39:49.02-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.028  INFO 14 --- [           main] nfigurationApplicationContextInitializer : Adding cloud service auto-reconfiguration to ApplicationContext
+2017-04-04T18:39:49.04-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.046  INFO 14 --- [           main] i.p.e.articulate.ArticulateApplication   : Starting ArticulateApplication on e1444c83-4b34-45e7-42ad-10e2ecac6b67 with PID 14 (/home/vcap/app started by vcap in /home/vcap/app)
+2017-04-04T18:39:49.87-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.873  INFO 14 --- [           main] urceCloudServiceBeanFactoryPostProcessor : No beans of type javax.sql.DataSource found. Skipping auto-reconfiguration.
+2017-04-04T18:39:49.86-0400 [APP/PROC/WEB/0]OUT 2017-04-04 22:39:49.869  INFO 14 --- [           main] urceCloudServiceBeanFactoryPostProcessor : Auto-reconfiguring beans of type javax.sql.DataSource
+
+----
+<1> The CELL indicates that it is starting another instance of the application as a result of the Health Manager observing a difference between the desired and actual state (i.e. running instances = 1 vs. running instances = 0).
+<2> The new application instance starts logging events as it starts up.
+====
+Hit CTRL + C to stop tailing the logs.
+
+. Revisiting the *HOME PAGE* of the application and you should see a fresh instance started:
++
+image::../../Common/images/ha-ok.png[]
+
+This completes the lab for Monitoring, Metrics and HA!
 
