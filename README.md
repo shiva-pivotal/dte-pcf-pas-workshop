@@ -10,7 +10,7 @@ Java workshop with Pivotal Application Service
 Time | Session
 ---- | -------
 2:00 PM - 2:15 PM | Welcome and Introductions
-2:15 PM - 2:30 PM | _Intro to Pivotal Cloud Foundry_
+2:15 PM - 2:30 PM | _Intro to Pivotal and PCF_
 2:30 PM - 2:45 PM | Lab 0: _Accessing the Workshop Environment_
 2:45 PM - 3:15 PM | Lab 1: _Pushing Your First Application_
 3:15 PM - 3:30 PM | _Labs Review_
@@ -26,7 +26,7 @@ This is a _loose_ schedule for the day. We will adjust as necessary based on our
 
 ## Course Materials
 
-#### _Intro to Pivotal Cloud Foundry_ [(Slides)](session_01/Developer_Overview_Cloud_Native_Platform.pdf)
+#### _Intro to Pivotal and Pivotal Cloud Foundry_ [(Slides)](session_01/Developer_Overview_Cloud_Native_Platform.pdf)
   - [Lab 0 - Setup the Workshop Environment](session_01/lab_00/lab_00.adoc)
   - [Lab 1 - Pushing Your First Application](session_01/lab_01/lab_01.adoc)
   - [Lab 2 - Scaling, Auto Scaling](session_01/lab_02/lab_02.adoc)
